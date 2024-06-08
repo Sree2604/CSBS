@@ -1,13 +1,77 @@
 import React from "react";
+import { useState } from "react";
 import { FaArrowRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import Sympo from "./Sympo";
+import Sympo from "../Components/Sympo";
+import axios from "axios";
 
 const Student = () => {
   const navigate = useNavigate();
-  const handleSubmit = (e) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    rollNo: "",
+    regNo: "",
+    batch: "",
+    mail: "",
+    age: "",
+    dob: "",
+    gender: "",
+    phoneNo: "",
+    fatherName: "",
+    fatherPhone: "",
+    motherName: "",
+    motherPhone: "",
+    address: "",
+    tenthPercentage: "",
+    twelthPercentage: "",
+    polytechnicPercentage: "",
+    semesterMarksheets: [],
+  });
+  const [files, setFiles] = useState({
+    tenthMarksheet: null,
+    twelthMarksheet: null,
+    polytechnicMarksheet: null,
+  });
+
+  const [batches, setBatches] = useState([]);
+
+  useEffect(() => {
+    const fetchBatchDetails = async () => {
+      const res = await fetch(`http://localhost:3000/staff/getBatch`);
+      const data = await res.json();
+      const durations = data.map((item) => item.duration);
+      setBatches([...batches, ...durations]);
+    };
+    fetchBatchDetails();
+  }, []);
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    setFiles({ ...files, [e.target.name]: e.target.files[0] });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/Drop");
+    const form = new FormData();
+    for (const key in formData) {
+      form.append(key, formData[key]);
+    }
+    for (const key in files) {
+      if (files[key]) {
+        form.append(key, files[key]);
+      }
+    }
+
+    try {
+      await axios.post("http://localhost:3000/student", form);
+      alert("Student and files uploaded successfully");
+    } catch (error) {
+      console.error("Error uploading student data and files:", error);
+      alert("Failed to upload student data and files");
+    }
   };
 
   return (
@@ -24,9 +88,9 @@ const Student = () => {
               </label>
               <input
                 type="text"
-                id="username"
-                name="username"
+                name="name"
                 placeholder="Name"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -37,8 +101,9 @@ const Student = () => {
               </label>
               <input
                 type="text"
-                id="rollNo"
+                name="rollNo"
                 placeholder="Roll no"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -49,8 +114,9 @@ const Student = () => {
               </label>
               <input
                 type="text"
-                id="registerNo"
+                name="regNo"
                 placeholder="Register no"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -61,8 +127,9 @@ const Student = () => {
               </label>
               <input
                 type="email"
-                id="email"
+                name="mail"
                 placeholder="Email ID"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -73,11 +140,23 @@ const Student = () => {
               </label>
               <input
                 type="number"
-                id="age"
+                name="age"
                 placeholder="Age"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
+            </div>
+            <div className="flex justify-between">
+              <label htmlFor="age" className="text-xl">
+                Batch:
+              </label>
+              <select name="batch" onChange={handleInputChange}>
+                <option value="">Select the batch</option>
+                {batches.map((batch) => (
+                  <option value={batch}>{batch}</option>
+                ))}
+              </select>
             </div>
             <div className="flex justify-between">
               <label htmlFor="dob" className="text-xl">
@@ -85,7 +164,8 @@ const Student = () => {
               </label>
               <input
                 type="date"
-                id="dob"
+                name="dob"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -98,7 +178,8 @@ const Student = () => {
                   <input
                     type="radio"
                     name="gender"
-                    value="male"
+                    value="Male"
+                    onChange={handleInputChange}
                     className="mr-2"
                     required
                   />
@@ -108,7 +189,8 @@ const Student = () => {
                   <input
                     type="radio"
                     name="gender"
-                    value="female"
+                    value="Female"
+                    onChange={handleInputChange}
                     className="mr-2"
                     required
                   />
@@ -122,9 +204,10 @@ const Student = () => {
                 Student Phone no:
               </label>
               <input
-                type="tel"
-                id="studentPhone"
+                type="number"
+                name="phoneNo"
                 placeholder="Student phone no"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -135,8 +218,9 @@ const Student = () => {
               </label>
               <input
                 type="text"
-                id="fatherName"
+                name="fatherName"
                 placeholder="Father Name"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -147,8 +231,9 @@ const Student = () => {
               </label>
               <input
                 type="tel"
-                id="fatherPhone"
+                name="fatherPhone"
                 placeholder="Father phone no"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -159,9 +244,10 @@ const Student = () => {
               </label>
               <input
                 type="text"
-                id="motherName"
+                name="motherName"
                 placeholder="Mother Name"
                 className="text-center rounded-xl outline-none mt-1"
+                onChange={handleInputChange}
                 required
               />
             </div>
@@ -171,8 +257,9 @@ const Student = () => {
               </label>
               <input
                 type="tel"
-                id="motherPhone"
+                name="motherPhone"
                 placeholder="Mother phone no"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -183,8 +270,9 @@ const Student = () => {
               </label>
               <input
                 type="text"
-                id="address"
+                name="address"
                 placeholder="Address"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
                 required
               />
@@ -194,10 +282,11 @@ const Student = () => {
                 Enter your 10th mark and percentage:
               </label>
               <input
-                type="text"
-                id="mark10"
+                type="number"
+                name="tenthPercentage"
                 placeholder="10th Mark"
                 className="text-center rounded-xl outline-none mt-1"
+                onChange={handleInputChange}
                 required
               />
             </div>
@@ -207,8 +296,9 @@ const Student = () => {
               </label>
               <input
                 type="file"
-                id="markSheet10"
+                name="tenthMarksheet"
                 className="text-center rounded-xl outline-none mt-1"
+                onChange={handleFileChange}
                 required
               />
             </div>
@@ -217,9 +307,10 @@ const Student = () => {
                 Enter your 12th mark and percentage:
               </label>
               <input
-                type="text"
-                id="mark12"
+                type="number"
+                name="twelthPercentage"
                 placeholder="12th Mark"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
               />
             </div>
@@ -229,7 +320,8 @@ const Student = () => {
               </label>
               <input
                 type="file"
-                id="markSheet12"
+                name="twelthMarksheet"
+                onChange={handleFileChange}
                 className="text-center rounded-xl  outline-none mt-1"
               />
             </div>
@@ -238,9 +330,10 @@ const Student = () => {
                 Enter your polytechnic mark and percentage:
               </label>
               <input
-                type="text"
-                id="mark12"
+                type="number"
+                name="polytechnicPercentage"
                 placeholder="12th Mark"
+                onChange={handleInputChange}
                 className="text-center rounded-xl outline-none mt-1"
               />
             </div>
@@ -250,11 +343,15 @@ const Student = () => {
               </label>
               <input
                 type="file"
-                id="markSheet12"
+                name="polytechnicMarksheet"
+                onChange={handleFileChange}
                 className="text-center rounded-xl  outline-none mt-1"
               />
             </div>
-            <button className="py-2 mt-8 flex items-center justify-center gap-2 bg-blue2 hover:bg-black text-white px-6 rounded-2xl duration-300 hover:duration-500">
+            <button
+              type="submit"
+              className="py-2 mt-8 flex items-center justify-center gap-2 bg-blue2 hover:bg-black text-white px-6 rounded-2xl duration-300 hover:duration-500"
+            >
               Click
               <FaArrowRight />
             </button>
